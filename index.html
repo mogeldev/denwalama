@@ -1,0 +1,637 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Denwa Lama</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Press+Start+2P&family=Space+Mono:wght@400;700&family=VT323&display=swap" rel="stylesheet">
+<style>
+  :root{
+    --teal:#7FE3DB;
+    --teal-deep:#5FD0C6;
+    --cream:#EAFBF6;
+    --violet:#6C2FD6;
+    --violet-soft:#8A5CE8;
+    --ink:#14121F;
+    --violet-ink:#3D1E85;
+    --teal-ink:#0B4A45;
+    --coral:#FF6F5B;
+    --amber:#FFD166;
+    --shadow-ink:#1D8C82;
+
+    --font-display:"Press Start 2P", "Courier New", monospace;
+    --font-body:"Space Mono", "Consolas", monospace;
+    --font-term:"VT323", "Consolas", monospace;
+
+    color-scheme: light;
+  }
+
+  *{ box-sizing:border-box; }
+
+  html{ -webkit-text-size-adjust:100%; }
+
+  body{
+    margin:0;
+    background:var(--teal);
+    color:var(--violet-ink);
+    font-family:var(--font-body);
+    font-size:16px;
+    line-height:1.55;
+    overflow-x:hidden;
+  }
+
+  /* subtle CRT scanline atmosphere, purely decorative */
+  body::before{
+    content:"";
+    position:fixed; inset:0;
+    pointer-events:none;
+    z-index:50;
+    background:repeating-linear-gradient(
+      to bottom,
+      rgba(20,18,31,0.045) 0px,
+      rgba(20,18,31,0.045) 1px,
+      transparent 1px,
+      transparent 3px
+    );
+    mix-blend-mode:multiply;
+  }
+
+  a{ color:inherit; }
+
+  a:focus-visible,
+  button:focus-visible,
+  .btn:focus-visible{
+    outline:3px solid var(--coral);
+    outline-offset:3px;
+  }
+
+  h1,h2,h3{ text-wrap:balance; margin:0; }
+
+  .wrap{
+    max-width:960px;
+    margin:0 auto;
+    padding:0 24px;
+  }
+
+  /* ============== SHARED "WINDOW" CHROME ============== */
+  .win{
+    background:var(--teal);
+    border:3px solid var(--ink);
+    box-shadow:6px 6px 0 var(--shadow-ink);
+  }
+
+  .win-title{
+    display:flex;
+    align-items:center;
+    justify-content:space-between;
+    gap:12px;
+    background:var(--violet);
+    color:var(--cream);
+    border-bottom:3px solid var(--ink);
+    padding:10px 14px;
+    font-family:var(--font-display);
+    font-size:11px;
+    letter-spacing:0.5px;
+  }
+
+  .win-title .dots{
+    display:flex;
+    gap:6px;
+    flex:none;
+  }
+  .win-title .dots i{
+    width:12px; height:12px;
+    background:var(--cream);
+    border:2px solid var(--ink);
+    display:block;
+  }
+
+  .win-body{ padding:28px; }
+
+  /* ============== TOP BAR ============== */
+  .topbar{
+    padding:14px 24px;
+    display:flex;
+    align-items:center;
+    justify-content:space-between;
+    font-family:var(--font-term);
+    font-size:19px;
+    color:var(--teal-ink);
+  }
+  .topbar .brand{
+    font-family:var(--font-display);
+    font-size:11px;
+    color:var(--violet-ink);
+  }
+  .topbar nav{
+    display:flex;
+    gap:20px;
+  }
+  .topbar nav a{ text-decoration:none; }
+  .topbar nav a:hover{ color:var(--violet); text-decoration:underline; }
+
+  /* ============== HERO ============== */
+  .hero-outer{ padding:24px 24px 8px; }
+  .hero{
+    animation:boot 0.5s ease-out;
+  }
+  @keyframes boot{
+    from{ opacity:0; transform:translateY(10px) scale(0.99); }
+    to{ opacity:1; transform:none; }
+  }
+  .hero .win-body{
+    padding:44px 40px 40px;
+    text-align:center;
+  }
+
+  .eyebrow{
+    font-family:var(--font-term);
+    font-size:20px;
+    color:var(--teal-ink);
+    letter-spacing:1px;
+    margin:0 0 18px;
+  }
+
+  .hero h1{
+    font-family:var(--font-display);
+    font-size:clamp(28px, 6vw, 46px);
+    line-height:1.3;
+    color:var(--violet-ink);
+    margin-bottom:22px;
+  }
+
+  .hero .tagline{
+    max-width:38em;
+    margin:0 auto 28px;
+    font-size:17px;
+    color:var(--violet-ink);
+  }
+
+  .cursor{
+    display:inline-block;
+    animation:blink 1s step-end infinite;
+    color:var(--coral);
+  }
+  @media (prefers-reduced-motion:reduce){ .cursor{ animation:none; } }
+  @keyframes blink{ 50%{ opacity:0; } }
+
+  .badges{
+    display:flex;
+    flex-wrap:wrap;
+    justify-content:center;
+    gap:10px;
+    margin-bottom:32px;
+  }
+  .badge{
+    font-family:var(--font-term);
+    font-size:16px;
+    letter-spacing:0.5px;
+    background:var(--cream);
+    border:2px solid var(--ink);
+    padding:4px 12px;
+    color:var(--violet-ink);
+  }
+
+  .cta-row{
+    display:flex;
+    flex-wrap:wrap;
+    gap:16px;
+    justify-content:center;
+  }
+
+  /* ============== RETRO 3D BUTTON (matches the app's own button style) ============== */
+  .btn{
+    position:relative;
+    display:inline-block;
+    font-family:var(--font-display);
+    font-size:12px;
+    text-decoration:none;
+    color:var(--violet-ink);
+    background:#ECEAF7;
+    border:2px solid var(--ink);
+    padding:14px 22px;
+    box-shadow:4px 4px 0 var(--shadow-ink);
+    transition:transform 0.08s ease, box-shadow 0.08s ease;
+    cursor:pointer;
+  }
+  .btn:hover{ background:#FFFFFF; }
+  .btn:active{
+    transform:translate(4px, 4px);
+    box-shadow:0 0 0 var(--shadow-ink);
+  }
+  .btn-primary{ background:var(--amber); }
+  .btn-primary:hover{ background:#ffdb85; }
+  .btn-ghost{ background:var(--cream); }
+
+  .btn-caption{
+    display:block;
+    margin-top:8px;
+    font-family:var(--font-term);
+    font-size:15px;
+    color:var(--teal-ink);
+  }
+
+  /* ============== SECTION HEADERS ============== */
+  .section{ padding:56px 24px 8px; }
+  .section-head{
+    text-align:center;
+    max-width:44em;
+    margin:0 auto 32px;
+  }
+  .section-head .eyebrow{ margin-bottom:10px; }
+  .section-head h2{
+    font-family:var(--font-display);
+    font-size:clamp(18px, 3.4vw, 24px);
+    color:var(--violet-ink);
+  }
+
+  /* ============== FEATURES GRID ============== */
+  .features{
+    display:grid;
+    grid-template-columns:repeat(auto-fit, minmax(240px, 1fr));
+    gap:20px;
+  }
+  .feature{
+    background:var(--cream);
+    border:3px solid var(--ink);
+    box-shadow:5px 5px 0 var(--shadow-ink);
+    padding:20px 20px 22px;
+  }
+  .feature .icon{
+    font-size:26px;
+    margin-bottom:10px;
+    display:block;
+  }
+  .feature h3{
+    font-family:var(--font-body);
+    font-weight:700;
+    font-size:14px;
+    letter-spacing:0.4px;
+    color:var(--violet-ink);
+    margin-bottom:8px;
+  }
+  .feature p{
+    margin:0;
+    font-size:14.5px;
+    color:var(--ink);
+  }
+
+  /* ============== SCREENSHOT MOCKUP ============== */
+  .shot-outer{ padding:56px 24px 8px; }
+  .shot{ transform:rotate(-0.35deg); }
+  .shot .win-body{ padding:16px; }
+
+  .mock{
+    display:flex;
+    border:2px solid var(--ink);
+    min-height:340px;
+    background:var(--cream);
+    overflow-x:auto;
+  }
+  .mock-side{
+    flex:none;
+    width:150px;
+    background:var(--teal);
+    border-right:2px solid var(--ink);
+    padding:14px 10px;
+  }
+  .mock-nav{
+    font-family:var(--font-display);
+    font-size:8px;
+    letter-spacing:0.5px;
+    padding:10px 8px;
+    margin-bottom:6px;
+    border:2px solid var(--ink);
+    color:var(--violet-ink);
+    background:transparent;
+  }
+  .mock-nav.active{
+    background:var(--violet);
+    color:var(--cream);
+  }
+  .mock-main{
+    flex:1 1 auto;
+    min-width:420px;
+    padding:16px;
+    font-family:var(--font-body);
+    font-size:12px;
+  }
+  .mock-connbar{
+    border:2px solid var(--ink);
+    background:var(--cream);
+    padding:8px 12px;
+    margin-bottom:14px;
+    display:flex;
+    align-items:center;
+    gap:8px;
+    flex-wrap:wrap;
+  }
+  .mock-dot{
+    width:8px; height:8px;
+    background:#22C79A;
+    border:1px solid var(--ink);
+    display:inline-block;
+    flex:none;
+  }
+  .mock-card{
+    border:2px solid var(--ink);
+    margin-bottom:14px;
+  }
+  .mock-card-title{
+    background:var(--violet);
+    color:var(--cream);
+    font-family:var(--font-display);
+    font-size:9px;
+    padding:8px 10px;
+  }
+  table.mock-table{
+    width:100%;
+    border-collapse:collapse;
+    font-size:11.5px;
+  }
+  table.mock-table th{
+    text-align:left;
+    background:var(--violet-soft);
+    color:var(--cream);
+    padding:6px 10px;
+    font-weight:700;
+  }
+  table.mock-table td{
+    padding:6px 10px;
+    border-top:1px solid #cfe9e4;
+    font-variant-numeric:tabular-nums;
+  }
+  .mock-gauges{ padding:10px 10px 12px; }
+  .mock-gauge{
+    display:grid;
+    grid-template-columns:44px 1fr 40px;
+    align-items:center;
+    gap:8px;
+    margin-bottom:8px;
+    font-size:11px;
+  }
+  .mock-gauge b{ text-align:right; font-variant-numeric:tabular-nums; }
+  .mock-bar{
+    height:12px;
+    border:1px solid var(--ink);
+    background:var(--cream);
+  }
+  .mock-bar i{
+    display:block;
+    height:100%;
+    background:repeating-linear-gradient(90deg, var(--shadow-ink) 0 7px, var(--cream) 7px 10px);
+  }
+
+  /* ============== DOWNLOAD ============== */
+  .dl-outer{ padding:56px 24px 8px; }
+  .dl{ transform:rotate(0.3deg); }
+  .dl .win-body{ text-align:center; }
+
+  .reqs{
+    list-style:none;
+    margin:0 0 30px;
+    padding:0;
+    display:inline-flex;
+    flex-direction:column;
+    gap:8px;
+    text-align:left;
+    font-size:14.5px;
+  }
+  .reqs li::before{ content:"▸ "; color:var(--violet); }
+
+  .placeholder-note{
+    margin-top:14px;
+    font-family:var(--font-term);
+    font-size:16px;
+    color:var(--coral);
+  }
+
+  /* ============== FOOTER / TASKBAR ============== */
+  .taskbar{
+    margin-top:64px;
+    background:var(--ink);
+    color:var(--cream);
+    border-top:3px solid var(--ink);
+    padding:14px 24px;
+    display:flex;
+    flex-wrap:wrap;
+    gap:14px;
+    align-items:center;
+    justify-content:space-between;
+    font-family:var(--font-term);
+    font-size:17px;
+  }
+  .taskbar .start{
+    background:var(--violet);
+    border:2px solid var(--cream);
+    padding:4px 12px;
+    font-family:var(--font-display);
+    font-size:10px;
+  }
+  .taskbar .status{
+    display:flex;
+    align-items:center;
+    gap:8px;
+  }
+  .taskbar .status .led{
+    width:9px; height:9px;
+    background:#22C79A;
+    display:inline-block;
+    animation:pulse 1.6s ease-in-out infinite;
+  }
+  @media (prefers-reduced-motion:reduce){ .taskbar .status .led{ animation:none; } }
+  @keyframes pulse{ 0%,100%{ opacity:1; } 50%{ opacity:0.35; } }
+
+  .credits{
+    text-align:center;
+    padding:16px 24px 32px;
+    font-family:var(--font-term);
+    font-size:15px;
+    color:var(--teal-ink);
+  }
+  .credits a{ text-decoration:underline; }
+
+  @media (max-width:640px){
+    .win-body{ padding:22px; }
+    .hero .win-body{ padding:30px 20px; }
+    .mock-side{ width:120px; }
+    .topbar{ flex-direction:column; gap:10px; text-align:center; }
+  }
+</style>
+</head>
+<body>
+
+<div class="topbar wrap">
+  <span class="brand">🦙 DENWA LAMA</span>
+  <nav>
+    <a href="#features">features</a>
+    <a href="#preview">preview</a>
+    <a href="#download">download</a>
+  </nav>
+</div>
+
+<div class="hero-outer wrap">
+  <section class="win hero">
+    <div class="win-title">
+      <span>DENWA_LAMA.EXE</span>
+      <span class="dots"><i></i><i></i><i></i></span>
+    </div>
+    <div class="win-body">
+      <p class="eyebrow">C:\&gt; REMOTE OLLAMA MANAGEMENT, NO TERMINAL REQUIRED</p>
+      <h1>DENWA<br>LLAMA</h1>
+      <p class="tagline">A retro-styled desktop client for a remote Ollama server — connect over SSH,
+        manage models, and watch host resources without touching a terminal.<span class="cursor">_</span></p>
+
+      <div class="badges">
+        <span class="badge">v1.0.0</span>
+        <span class="badge">WINDOWS</span>
+        <span class="badge">LINUX</span>
+        <span class="badge">SSH</span>
+      </div>
+
+      <div class="cta-row">
+        <div>
+          <a class="btn btn-primary" href="#download">DOWNLOAD</a>
+        </div>
+        <div>
+          <a class="btn btn-ghost" href="#features">SEE WHAT IT DOES</a>
+        </div>
+      </div>
+    </div>
+  </section>
+</div>
+
+<section class="section wrap" id="features">
+  <div class="section-head">
+    <p class="eyebrow">FEATURES.LOG</p>
+    <h2>WHAT IT DOES</h2>
+  </div>
+  <div class="features">
+    <div class="feature">
+      <span class="icon">🔐</span>
+      <h3>CONNECT OVER SSH</h3>
+      <p>Standard SSH authentication against your existing server — no server-side agent, no persisted
+        credentials, no extra setup.</p>
+    </div>
+    <div class="feature">
+      <span class="icon">📦</span>
+      <h3>MANAGE MODELS</h3>
+      <p>List, pull, stop, and delete installed models — batch-select multiple at once.</p>
+    </div>
+    <div class="feature">
+      <span class="icon">🖥</span>
+      <h3>WATCH THE HOST</h3>
+      <p>Live CPU, memory, disk, and GPU utilization, auto-refreshed on a configurable interval.</p>
+    </div>
+    <div class="feature">
+      <span class="icon">📜</span>
+      <h3>READ THE LOGS</h3>
+      <p>Tail journalctl or the server's log file directly — no separate SSH session needed.</p>
+    </div>
+    <div class="feature">
+      <span class="icon">🔁</span>
+      <h3>RESTART THE SERVICE</h3>
+      <p>Restart the Ollama service in one click, with automatic sudo fallback if needed.</p>
+    </div>
+    <div class="feature">
+      <span class="icon">💬</span>
+      <h3>TEST PROMPTS</h3>
+      <p>Send a request to any OpenAI-compatible endpoint and inspect the response, using the same
+        model list you already manage.</p>
+    </div>
+    <div class="feature">
+      <span class="icon">💾</span>
+      <h3>SAVE CONNECTIONS</h3>
+      <p>Switch between multiple named SSH targets from a dropdown — each with its own optional
+        saved password.</p>
+    </div>
+    <div class="feature">
+      <span class="icon">🌐</span>
+      <h3>DEUTSCH / ENGLISH</h3>
+      <p>Switch the entire UI between German and English live, no restart required.</p>
+    </div>
+  </div>
+</section>
+
+<div class="shot-outer wrap" id="preview">
+  <div class="section-head">
+    <p class="eyebrow">SCREENSHOT.PNG</p>
+    <h2>THE INTERFACE</h2>
+  </div>
+  <section class="win shot">
+    <div class="win-title">
+      <span>PREVIEW — DENWA_LAMA.EXE</span>
+      <span class="dots"><i></i><i></i><i></i></span>
+    </div>
+    <div class="win-body">
+      <div class="mock">
+        <div class="mock-side">
+          <div class="mock-nav active">📦 MODELS</div>
+          <div class="mock-nav">🖥 HOST</div>
+          <div class="mock-nav">💬 PROMPT</div>
+        </div>
+        <div class="mock-main">
+          <div class="mock-connbar">
+            <span class="mock-dot"></span> host: ollama.internal · user: admin · connected
+          </div>
+          <div class="mock-card">
+            <div class="mock-card-title">INSTALLED MODELS</div>
+            <table class="mock-table">
+              <tr><th>NAME</th><th>SIZE</th><th>MODIFIED</th></tr>
+              <tr><td>llama3:8b</td><td>4.7 GB</td><td>2 days ago</td></tr>
+              <tr><td>mistral:7b</td><td>4.1 GB</td><td>1 week ago</td></tr>
+              <tr><td>codellama:13b</td><td>7.4 GB</td><td>3 weeks ago</td></tr>
+            </table>
+          </div>
+          <div class="mock-card">
+            <div class="mock-card-title">HOST</div>
+            <div class="mock-gauges">
+              <div class="mock-gauge"><span>CPU</span><div class="mock-bar"><i style="width:34%"></i></div><b>34%</b></div>
+              <div class="mock-gauge"><span>MEM</span><div class="mock-bar"><i style="width:61%"></i></div><b>61%</b></div>
+              <div class="mock-gauge"><span>DISK</span><div class="mock-bar"><i style="width:22%"></i></div><b>22%</b></div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </section>
+</div>
+
+<div class="dl-outer wrap" id="download">
+  <section class="win dl">
+    <div class="win-title">
+      <span>SETUP.EXE</span>
+      <span class="dots"><i></i><i></i><i></i></span>
+    </div>
+    <div class="win-body">
+      <p class="eyebrow">REQUIREMENTS.TXT</p>
+      <h2 style="font-family:var(--font-display); font-size:clamp(18px,3.4vw,24px); margin-bottom:22px;">INSTALL</h2>
+
+      <ul class="reqs">
+        <li>Windows 10/11 or Linux (x64)</li>
+        <li>Self-contained build — no .NET runtime install needed</li>
+        <li>SSH access to a host running Ollama</li>
+      </ul>
+
+      <div>
+        <a class="btn btn-primary" href="#download">DOWNLOAD v1.0.0</a>
+        <p class="btn-caption">Windows: installer or portable ZIP · Linux: AppImage — no admin rights needed</p>
+      </div>
+      <p class="placeholder-note">// build not published yet — this button is a placeholder</p>
+    </div>
+  </section>
+</div>
+
+<footer class="taskbar">
+  <span class="start">☰ START</span>
+  <span class="status"><span class="led"></span> CONNECTION: IDLE</span>
+</footer>
+<p class="credits">Made by <a href="https://mogeldev.github.io" target="_blank" rel="noopener">mogeldev</a> ·
+  Built with Claude (Anthropic) · Press Start 2P, Space Mono &amp; VT323 via
+  <a href="https://fonts.google.com/" target="_blank" rel="noopener">Google Fonts</a> (OFL)</p>
+<p class="credits" style="margin-top:-8px;">Denwa Lama is an independent tool, not affiliated with or endorsed by Ollama Inc.</p>
+
+</body>
+</html>
